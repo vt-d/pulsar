@@ -2,7 +2,7 @@ import logging
 from pulsar import Client, Intent
 from pulsar.gateway.events import MessageCreateEvent, ReadyEvent
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 
 TOKEN = "skibidi"
 intents = [Intent.GUILDS, Intent.GUILD_MESSAGES, Intent.MESSAGE_CONTENT]

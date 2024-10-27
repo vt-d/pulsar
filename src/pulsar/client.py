@@ -1,6 +1,5 @@
 import asyncio
 import logging
-import re
 from typing import List, Callable, Optional, Dict, Any
 import signal
 import aiohttp
@@ -9,6 +8,7 @@ from .gateway.connection import GatewayConnection
 from .gateway.events import Intent, Event
 
 logger = logging.getLogger(__name__)
+
 
 class Client:
     """
@@ -59,14 +59,16 @@ class Client:
         while self._running:
             try:
                 if not self.gateway:
-                    self.gateway = await GatewayConnection.create(self.token, self.intents)
+                    self.gateway = await GatewayConnection.create(
+                        self.token, self.intents
+                    )
                     self._register_stored_event_handlers()
                 await self.gateway.connect()
             except ConnectionError as e:
                 logger.error(f"Connection error: {e}")
             except Exception as e:
                 logger.exception(f"Unexpected error in gateway connection: {e}")
-            
+
             if self._running:
                 logger.info(f"Reconnecting in {retry_interval} seconds...")
                 await asyncio.sleep(retry_interval)
@@ -114,9 +116,15 @@ class Client:
     def _validate_token_and_intents(self):
         if not self.token or len(self.token) < 50:  # Simple length check
             raise ValueError("Invalid bot token: Token seems too short")
-        
-        required_intents = [Intent.GUILDS, Intent.GUILD_MESSAGES, Intent.MESSAGE_CONTENT]
-        missing_intents = [intent for intent in required_intents if intent not in self.intents]
+
+        required_intents = [
+            Intent.GUILDS,
+            Intent.GUILD_MESSAGES,
+            Intent.MESSAGE_CONTENT,
+        ]
+        missing_intents = [
+            intent for intent in required_intents if intent not in self.intents
+        ]
         if missing_intents:
             raise ValueError(f"Missing required intents: {missing_intents}")
 
@@ -131,8 +139,10 @@ class Client:
             "Content-Type": "application/json",
         }
         url = f"{self.base_url}/{endpoint}"
-        
-        async with self.session.request(method, url, headers=headers, **kwargs) as response:
+
+        async with self.session.request(
+            method, url, headers=headers, **kwargs
+        ) as response:
             response.raise_for_status()
             return await response.json()
 
@@ -141,12 +151,12 @@ class Client:
 
     async def create_message(self, channel_id: str, content: str) -> Dict[str, Any]:
         payload = {"content": content}
-        return await self._request("POST", f"channels/{channel_id}/messages", json=payload)
+        return await self._request(
+            "POST", f"channels/{channel_id}/messages", json=payload
+        )
 
     async def connect_gateway(self):
         if not self.gateway:
             self.gateway = await GatewayConnection.create(self.token, self.intents)
             self._register_stored_event_handlers()
         await self.gateway.connect()
-
-    # Add more API methods as needed

@@ -7,6 +7,8 @@ import aiohttp
 
 from .events import Intent, OpCode, Event, create_event
 
+# dont ask me why i document hidden methods
+
 logger = logging.getLogger(__name__)
 
 
